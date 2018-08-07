@@ -3,3 +3,6 @@
 
 # NodeJs
 node_modules
+
+# Jetbrain
+.idea
