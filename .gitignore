@@ -1,0 +1,5 @@
+# Development env var
+.env
+
+# NodeJs
+node_modules

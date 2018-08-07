@@ -1,0 +1,70 @@
+version: "3.6"
+
+networks:
+  cockroach_network:
+  public_network:
+
+volumes:
+  roachVolume01: {}
+  roachVolume02: {}
+  roachVolume03: {}
+
+services:
+  roach1:
+    image: cockroachdb/cockroach:v2.0.4
+    hostname: roach1
+    networks:
+      - cockroach_network
+    volumes:
+      - roachVolume01:/cockroach/cockroach-data
+    command: start --insecure
+
+  roach2:
+    image: cockroachdb/cockroach:v2.0.4
+    hostname: roach2
+    networks:
+      - cockroach_network
+    volumes:
+      - roachVolume02:/cockroach/cockroach-data
+    command: start --insecure --join=roach1
+    depends_on:
+      - roach1
+
+  roach3:
+    image: cockroachdb/cockroach:v2.0.4
+    hostname: roach3
+    networks:
+      - cockroach_network
+    volumes:
+      - roachVolume03:/cockroach/cockroach-data
+    command: start --insecure --join=roach1
+    depends_on:
+      - roach1
+
+  cockroach-init:
+    image: cockroachdb/cockroach:v2.0.4
+    networks:
+      - cockroach_network
+    volumes:
+      - ./configs/cockroach/setup_db.sh:/setup_db.sh
+      - ./configs/cockroach/backup.sql:/backup.sql
+    entrypoint: "/bin/bash"
+    command: /setup_db.sh
+    depends_on:
+      - roach1
+
+  haproxy:
+    image: haproxy:1.8
+    networks:
+      - cockroach_network
+      - public_network
+    ports:
+      - "26257:26257"
+      - "8081:8080"
+      - "6080:6080"
+    depends_on:
+      - roach1
+      - roach2
+      - roach3
+    volumes:
+      - ./configs/haproxy:/usr/local/etc/haproxy:ro

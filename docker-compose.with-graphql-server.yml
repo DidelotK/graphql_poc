@@ -1,0 +1,15 @@
+version: "3.6"
+
+services:
+  graphql:
+    image: graphql-server
+    build: graphql-server
+    hostname: graphql
+    ports:
+      - "3000:3000"
+    networks:
+      - public_network
+    environment:
+      - DB_URI=haproxy
+    depends_on:
+      - haproxy

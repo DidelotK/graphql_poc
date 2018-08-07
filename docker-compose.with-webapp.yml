@@ -1,0 +1,11 @@
+version: "3.6"
+
+services:
+  webapp:
+    image: webapp
+    build: webapp
+    hostname: webapp
+    ports:
+      - "4000:80"
+    networks:
+      - public_network
